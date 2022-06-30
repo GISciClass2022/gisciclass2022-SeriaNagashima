@@ -35,7 +35,7 @@ plot(world)
 names(world)
 ```
 
-```{r wold life_exp}
+```{r world life_exp}
 world["lifeExp"]
 world %>% dplyr::select(lifeExp) %>% st_drop_geometry()
 # st_drop_geometry(world["lifeExp"]) ↑同じ

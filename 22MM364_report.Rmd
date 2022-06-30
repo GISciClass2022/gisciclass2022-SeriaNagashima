@@ -1,0 +1,119 @@
+---
+title: '20220517'
+author: "Seria"
+date: "2022/5/17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r ex20220517}
+library(sf)
+library(raster)
+library(dplyr)
+library(tmap)    # for static and interactive maps
+library(leaflet) # for interactive maps
+library(ggplot2) # tidyverse data visualization package
+
+
+adm <- st_read("class/data/JPN_adm/JPN_adm2.shp")
+rail <- st_read("class/data/JPN_rrd/JPN_rails.shp")
+pop <- raster("class/data/JPN_msk_pop/JPN_msk_pop.grd")
+plot(adm)
+
+rail$geo2 <- rail$geometry
+saitama <- adm %>%
+  filter(NAME_1 == "Saitama") 
+adm_rail <- st_join(saitama, rail)
+saitama$NAME_2
+saitama$NL_NAME_2
+
+
+
+adm_map <- tm_shape(adm_rail$geometry) + tm_polygons()
+rail_map <- tm_shape(adm_rail$geo2) + tm_lines()
+pop_map <- tm_shape(pop) + tm_raster(alpha = 0.7)
+adm_rail3 <- adm_map + rail_map + pop_map
+adm_rail3
+class(adm_rail3)
+
+```
+
+```{r point data}
+point_shi <- read.csv("class/data/saitama-shi.csv")
+point_ken <- read.csv("class/data/saitama-ken.csv")
+points = rbind(point_shi, point_ken)
+
+lat = points$lat
+lon = points$lon
+class(lon)
+
+map_data <- 
+  adm_rail3 +
+  tm_shape(st_as_sf(points, coords=c("lon", "lat"), crs=4326)) +
+  tm_bubbles(col="red", scale=0.5, alpha=0.3)
+
+map_data  
+#library(leaflet)
+
+```
+
+```{r b}
+saitama$NL_NAME_2
+pop_saitama <- c(227020, 14214, 141036, 59706, 113640, 111881, 141336,
+                 78671, 80391, 52879, 61530, 60809, 13581, 54591, 
+                 2710, 91838, 78623, 44848, 145723, 116864, 13380,
+                 30347, 229767, 354680, 594461, 19398, 111702, 19878,
+                 12691, 65228, 341765, 150599, 194439, 27227, 28272,
+                 9305, 142177, 11040, 34163, 38452, 35379, 6809,
+                 19682, 166104, 10890, 28536, 11042, 74778, 17904,
+                 248037, 1324591, 100300, 50095, 148712, 5918, 75377,
+                 52223, 43860, 140868, 10547, 342535, 70198, 83997,
+                 74326, 36000, 93412, 7981, 32386, 72028, 18196)
+pop <- data.frame(pop_saitama)
+names(pop) <- c("pop_saitama")
+saitama_1 <- saitama
+saitama_new <- cbind(saitama, pop) 
+saitama_pop <- dplyr::select(saitama_new, pop_saitama, geometry)
+pop_map <- tm_shape(saitama_pop) + tm_fill()
+pop_map
+plot(saitama_pop)
+```
+
+
+```{r a}
+#data1 <- raster("class/data/JPN_msk_alt/JPN_msk_alt.vrt")
+data2 <- raster("class/data/JPN_msk_pop/JPN_msk_pop.vrt")
+rail_d <- dplyr::select(rail, geometry, )
+plot(rail_d)
+#plot(data1)
+map_jpn <- tm_shape(data0) + tm_borders() + tm_fill()
+breaks = c(-5, 0, 5, 10, 20, 30, 40) * 100
+#map_jpn1 <- map_jpn + tm_shape(data1) + tm_raster(alpha = 0.7, n = 10, palette = "OrRd")
+#map_jpn1 <- 
+  #map_jpn + tm_shape(data1) + tm_raster(title = "Japan elevation" ,alpha = 0.7, breaks = breaks)
+#map_jpn1
+#map_jpn2 <- map_jpn + tm_shape(data2) + tm_raster(alpha = 0.7)
+#map_jpn2
+
+```
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

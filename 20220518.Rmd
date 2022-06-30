@@ -31,6 +31,7 @@ plot(pressure)
 ```{r ex20220517}
 library(sf)
 library(raster)
+library(dplyr)
 
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
@@ -38,21 +39,55 @@ library(ggplot2) # tidyverse data visualization package
 
 
 
-data0 <- st_read("class/data/JPN_adm/JPN_adm1.shp")
-plot(data0)
-data0
-data1 <- raster("class/data/JPN_msk_alt/JPN_msk_alt.vrt")
+adm <- st_read("class/data/JPN_adm/JPN_adm2.shp")
+rail <- st_read("class/data/JPN_rrd/JPN_rails.shp")
+adm_rail <- st_join(adm, rail)
+
+saitama <- adm_rail %>%
+  filter(NAME_1 == "Tokyo") #%>%
+  #dplyr::select()
+
+plot(saitama)
+plot(adm$geometry)
+plot(adm_rail$geometry)
+adm_rail1 <- dplyr::select(adm_rail, )
+
+```
+
+
+
+
+```{r a}
+#data1 <- raster("class/data/JPN_msk_alt/JPN_msk_alt.vrt")
 data2 <- raster("class/data/JPN_msk_pop/JPN_msk_pop.vrt")
-plot(data1)
+rail_d <- dplyr::select(rail, geometry, )
+plot(rail_d)
+#plot(data1)
 map_jpn <- tm_shape(data0) + tm_borders() + tm_fill()
 breaks = c(-5, 0, 5, 10, 20, 30, 40) * 100
 #map_jpn1 <- map_jpn + tm_shape(data1) + tm_raster(alpha = 0.7, n = 10, palette = "OrRd")
-map_jpn1 <- 
-  map_jpn + tm_shape(data1) + tm_raster(title = "Japan elevation" ,alpha = 0.7, breaks = breaks)
-map_jpn1
+#map_jpn1 <- 
+  #map_jpn + tm_shape(data1) + tm_raster(title = "Japan elevation" ,alpha = 0.7, breaks = breaks)
+#map_jpn1
 #map_jpn2 <- map_jpn + tm_shape(data2) + tm_raster(alpha = 0.7)
 #map_jpn2
 
 ```
+
+```{r ex}
+japan <- st_read("class/data/japan_ver83/japan_ver83.shp")
+rail <- st_read("class/data/JPN_rrd/JPN_rails.shp")
+
+plot(japan)
+#jpn_rail <- st_join(japan, rail)
+jpn_pref <- dplyr::select(japan, KEN, SEIREI)
+jpn_rail <- tm_shape(jpn_pref) + tm_shape(rail)
+jpn_rail
+kanto <- japan %>% 
+  filter(KEN == "埼玉県") %>%
+  dplyr::select(KEN, SEIREI, SIKUCHOSON)
+plot(kanto)
+```
+
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

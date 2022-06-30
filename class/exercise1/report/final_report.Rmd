@@ -1,7 +1,7 @@
 ---
 title: "GIScience class final report"
-author: "YOUR NAME"
-date: "SUBMISSION DATE"
+author: "長島せりあ"
+date: "2022/06/30"
 output:
   html_document:
     df_print: paged
@@ -10,7 +10,7 @@ output:
     toc_float: true
   github_document:
     toc: yes
-subtitle: "テーマ or タイトル"
+subtitle: "人口と鉄道情報からみた埼玉県内のカーシェアリングサービス"
 fontsize: 11pt
 linestretch: 1.2
 link-citations: yes
@@ -22,48 +22,91 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## 0. 要旨
-AAAAAAAAAAAAAAAA. 
-BBBBBBBBBBBBBBBB. 
-CCCCCCCCCCCCCCC.   
-
+カーシェアリングが普及し始めている日本において、身近な地域である埼玉県を取り上げ、どのような地域にカーシェアリングの拠点が設置されているのか現状を考察した。
 
 
 <br>
 <br>
-  
-  下のフォーマットは一例です。　
-レポートの構成は多少替えても大丈夫です。
 
 ## 1. はじめに
 ### 1.1 背景
-XXXXXXXX。 
-Toblerは... [@tobler1970computer]。
-XXXXXXXXXXXX。  
+1940年にスイスで始まったカーシェアリングは、経済的に自動車を持つことができない市民に向けたサービスであった。
+その後大気汚染や地球温暖化などの環境問題に配慮するため、カーシェアリングは世界各地で普及し始めている[@backGround]。
+日本におけるカーシェアはスイスに比べはるかに低いが、自然環境や公共機関の発達度、財政状況などがスイスと似ていることから、今後の発展が期待できるとされている。
 
 ### 1.2 目的
-XXXXXXXX。   
+埼玉県内のカーシェアリングの現状を、拠点データと埼玉県のいくつかの情報を用いて考察する。
 
 ## 2. 手法
-XXXXXXXX。
-XXXXXXXXXXXX。  
+埼玉県内のカーシェアリングが設けられている拠点の位置データと鉄道情報、
+さらに埼玉県内の市町別の人口データの3つを利用して地図を作成する。
 
 ## 3. データ
-XXXXXXXX。
-XXXXXXXXXXXX。  
+・埼玉県内のカーシェアリング拠点の位置と数[@carShare_data] <br>
+・埼玉県内の鉄道路線[@rail_saitama] <br>
+・埼玉県内の市町別の人口[@pop_saitama]
 
-## 4. 結果
-XXXXXXXX。
-XXXXXXXXXXXX。  
 
-## 5. 考察
-XXXXXXXX。
-XXXXXXXXXXXX。  
+## 4. 結果・考察
+作成した地図は"6.Graphic Abstract"のようになった。
+作成した地図から、線路沿いにカーシェアリングの拠点が多いことが読み取れる。
+また、人口の多い市や町の拠点数が多いこともわかる。
+さらに、東京寄りになるほど拠点が増えているとも言える。
 
-## 6. 結論
-XXXXXXXX。
-XXXXXXXXXXXX。  
+## 5. 結論
+今回の地図の作成により、カーシェアリングの拠点が多い場所は、<br>
+・鉄道などの公共交通機関が発達している地域 <br>
+・人口が多い地域 <br>
+・首都寄りの地域 <br>
+であることが分かった。
 
-## 7. Graphic Abstract
+## 6. Graphic Abstract
 レポートを表す１枚の図をここで示す。
+```{r echo=FALSE}
+library(tmap)    # for static and interactive maps
+library(sf)
 
-## 8. 参考文献
+adm <- st_read("data/JPN_adm/JPN_adm2.shp")
+rail <- st_read("data/JPN_rrd/JPN_rails.shp")
+
+rail$geo2 <- rail$geometry
+saitama <- adm %>%
+  filter(NAME_1 == "Saitama") 
+
+pop_saitama <- c(227020, 14214, 141036, 59706, 113640, 111881, 141336,
+                 78671, 80391, 52879, 61530, 60809, 13581, 54591, 
+                 2710, 91838, 78623, 44848, 145723, 116864, 13380,
+                 30347, 229767, 354680, 594461, 19398, 111702, 19878,
+                 12691, 65228, 341765, 150599, 194439, 27227, 28272,
+                 9305, 142177, 11040, 34163, 38452, 35379, 6809,
+                 19682, 166104, 10890, 28536, 11042, 74778, 17904,
+                 248037, 1324591, 100300, 50095, 148712, 5918, 75377,
+                 52223, 43860, 140868, 10547, 342535, 70198, 83997,
+                 74326, 36000, 93412, 7981, 32386, 72028, 18196)
+pop <- data.frame(unlist(pop_saitama))
+names(pop) <- c("pop_saitama")
+
+
+saitama <- cbind(saitama, pop) 
+saitama_pop_rail <- st_join(saitama, rail)
+
+breaks = c(0, 1, 5, 10, 20, 30, 40, 50, 60, 150) * 10000
+pop_map <- tm_shape(saitama_pop_rail) + tm_polygons(col = "pop_saitama", breaks = breaks)
+rail_map <- tm_shape(saitama_pop_rail$geo2) + tm_lines() 
+
+point_shi <- read.csv("data/saitama-shi.csv")
+point_ken <- read.csv("data/saitama-ken.csv")
+points = rbind(point_shi, point_ken)
+lat = points$lat
+lon = points$lon
+
+#map_data <- 
+  pop_map + rail_map +
+  tm_shape(st_as_sf(points, coords=c("lon", "lat"), crs=4326)) +
+  tm_bubbles(col="red", scale=0.5, alpha=0.7)
+#map_data
+
+```
+
+
+## 7. 参考文献
