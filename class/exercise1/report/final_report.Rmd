@@ -63,7 +63,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## 6. Graphic Abstract
 レポートを表す１枚の図をここで示す。
 ```{r echo=FALSE}
-library(tmap)    # for static and interactive maps
+library(tmap)
 library(sf)
 
 adm <- st_read("data/JPN_adm/JPN_adm2.shp")
@@ -83,7 +83,7 @@ pop_saitama <- c(227020, 14214, 141036, 59706, 113640, 111881, 141336,
                  248037, 1324591, 100300, 50095, 148712, 5918, 75377,
                  52223, 43860, 140868, 10547, 342535, 70198, 83997,
                  74326, 36000, 93412, 7981, 32386, 72028, 18196)
-pop <- data.frame(unlist(pop_saitama))
+pop <- data.frame(pop_saitama)
 names(pop) <- c("pop_saitama")
 
 
@@ -100,12 +100,13 @@ points = rbind(point_shi, point_ken)
 lat = points$lat
 lon = points$lon
 
-#map_data <- 
+map_data <- 
   pop_map + rail_map +
   tm_shape(st_as_sf(points, coords=c("lon", "lat"), crs=4326)) +
   tm_bubbles(col="red", scale=0.5, alpha=0.7)
-#map_data
+tmap_save(tm = map_data, filename = "Graphic_Abstruct.png")
 
+knitr::include_graphics("Graphic_Abstruct.png")
 ```
 
 
