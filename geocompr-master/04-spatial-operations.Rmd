@@ -684,6 +684,8 @@ values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
 elev[rmask, drop = FALSE]           # with [ operator
 mask(elev, rmask)                   # with mask()
 overlay(elev, rmask, fun = "max")   # with overlay
+
+plot(rmask)
 ```
 
 ```{r 04-spatial-operations-39, eval=FALSE, echo=FALSE}
